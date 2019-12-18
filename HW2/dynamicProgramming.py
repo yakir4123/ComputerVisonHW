@@ -5,7 +5,7 @@ import itertools
 import matplotlib.pyplot as plt
 import datetime
 
-from cliqeFunctions import F, G, y2row
+from HW2.cliqeFunctions import F, G, y2row
 
 
 def T1(y2, temp, lattice_n):
@@ -75,16 +75,17 @@ def calculate_distribution(T, temp):
     """
     n = len(T)
     # Pn = T_{n-1}(yn) * G(yn) / Tn
-    Pn = [T[n-2][Yn] * G(y2row(Yn, n), temp) / T[n-1]
-          for Yn in range(0, 2**n)]
+    Pn = np.fromiter((T[n - 2][Yn] * G(y2row(Yn, n), temp) / T[n - 1]
+                     for Yn in range(0, 2 ** n)), dtype='float64')
     # list of all Pk where k in [1.. n-2]  ( or [2 .. n-1] if you look on the algorithm )
-    Pk = [[[T[k-1][Yk] * G(y2row(Yk, n), temp) * F(y2row(Yk, n), y2row(Yk_plus1, n), temp) / T[k][Yk_plus1]
-          for Yk in range(0, 2**n)]
-          for Yk_plus1 in range(0, 2**n)]
+    Pk = [np.array([
+        np.fromiter((T[k - 1][Yk] * G(y2row(Yk, n), temp) * F(y2row(Yk, n), y2row(Yk_plus1, n), temp) / T[k][Yk_plus1]
+                    for Yk in range(0, 2 ** n)), dtype='float64')
+        for Yk_plus1 in range(0, 2 ** n)])
           for k in range(n - 2, 0, -1)]
-    P1 = [[G(y2row(Y0, n), temp) * F(y2row(Y0, n), y2row(Y1, n), temp) / T[0][Y1]
-          for Y0 in range(0, 2**n)]
-          for Y1 in range(0, 2**n)]
+    P1 = np.array([np.fromiter((G(y2row(Y0, n), temp) * F(y2row(Y0, n), y2row(Y1, n), temp) / T[0][Y1]
+                                 for Y0 in range(0, 2 ** n)), dtype='float64')
+                     for Y1 in range(0, 2 ** n)])
     return [Pn] + Pk + [P1]
 
 
@@ -95,16 +96,16 @@ def sampleIsing(P):
     :return: Ising model represented Y
     """
     n = len(P)
-    yn = np.random.choice(np.arange(0, 2**n), p=P[0])
+    yn = np.random.choice(np.arange(0, 2 ** n), p=P[0])
     yk = itertools.accumulate([yn] + list(range(1, n)),
-                              lambda k_plus1, k: np.random.choice(np.arange(0, 2**n), p=P[k][k_plus1]))
+                              lambda k_plus1, k: np.random.choice(np.arange(0, 2 ** n), p=P[k][k_plus1]))
     return yk
 
 
 def generateImages(temp, samples, lattice_n):
     T = calculateT(temp, lattice_n)
     P = calculate_distribution(T, temp)
-    for _ in range(0,samples):
+    for _ in range(0, samples):
         yield sampleIsing(P)
 
 
