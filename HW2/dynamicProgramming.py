@@ -99,6 +99,13 @@ def sampleIsing(P):
     return yk
 
 
+def generateImages(temp, samples, lattice_n):
+    T = calculateT(temp, lattice_n)
+    P = calculate_distribution(T, temp)
+    for _ in range(0,samples):
+        yield sampleIsing(P)
+
+
 def computer_exercise7(lattice_n=8):
     temps = (1, 1.5, 2)
     fig, axs = plt.subplots(3, 10)
@@ -108,23 +115,19 @@ def computer_exercise7(lattice_n=8):
 
     for i in range(0, 10):
         axs[2, i].set(xlabel=cols[i])
-    for i in range(0,3):
+    for i in range(0, 3):
         axs[i, 0].set(ylabel=rows[i])
     for ax in axs.flat:
         ax.set_xticks([])
         ax.set_yticks([])
 
     for i in range(0, len(temps)):
-        T = calculateT(temps[i], lattice_n)
-        P = calculate_distribution(T, temps[i])
-        for j in range(0, 10):
-            Y = sampleIsing(P)
-            X = [y2row(yi, lattice_n) for yi in Y]
-            axs[i, j].imshow(X, cmap='gray', vmin=-1, vmax=1)
+        X = [[y2row(yi, lattice_n) for yi in Y] for Y in generateImages(temps[i], 10, lattice_n)]
+        [axs[i, j].imshow(X[j], cmap='gray', vmin=-1, vmax=1) for j in range(0, len(X))]
     plt.show()
 
 
 def main():
     start = datetime.datetime.now()
-    computer_exercise7(8)
+    computer_exercise7(2)
     print(datetime.datetime.now() - start)
