@@ -1,3 +1,5 @@
+import multiprocessing
+
 import numpy as np
 import itertools
 import matplotlib.pyplot as plt
@@ -106,28 +108,37 @@ def generateImages(temp, samples, lattice_n):
         yield sampleIsing(P)
 
 
+def worker(temp, samples, lattice_n):
+    """
+    worker for pool create list of 'samples' images lattice_n x lattice_n
+    """
+    return [[y2row(yi, lattice_n) for yi in Y] for Y in generateImages(temp, samples, lattice_n)]
+
+
 def computer_exercise7(lattice_n=8):
     temps = (1, 1.5, 2)
-    fig, axs = plt.subplots(3, 10)
+    samples = 10
+    fig, axs = plt.subplots(len(temps), samples)
 
     cols = ['{}'.format(col) for col in range(1, 11)]
     rows = ['Temp {}'.format(temp) for temp in temps]
 
-    for i in range(0, 10):
-        axs[2, i].set(xlabel=cols[i])
-    for i in range(0, 3):
+    for i in range(0, samples):
+        axs[len(temps) - 1, i].set(xlabel=cols[i])
+    for i in range(0, len(temps)):
         axs[i, 0].set(ylabel=rows[i])
     for ax in axs.flat:
         ax.set_xticks([])
         ax.set_yticks([])
 
-    for i in range(0, len(temps)):
-        X = [[y2row(yi, lattice_n) for yi in Y] for Y in generateImages(temps[i], 10, lattice_n)]
-        [axs[i, j].imshow(X[j], cmap='gray', vmin=-1, vmax=1) for j in range(0, len(X))]
+    pool = multiprocessing.Pool(processes=len(temps))
+    # call with different process to worker(temp,samples,lattice_n)
+    images = pool.starmap(worker, map(lambda temp: (temp, samples, lattice_n) , temps))
+    [axs[i, j].imshow(images[i][j], cmap='gray', vmin=-1, vmax=1) for j in range(0, samples) for i in range(0, len(images))]
     plt.show()
 
 
 def main():
     start = datetime.datetime.now()
-    computer_exercise7(2)
+    computer_exercise7(8)
     print(datetime.datetime.now() - start)
