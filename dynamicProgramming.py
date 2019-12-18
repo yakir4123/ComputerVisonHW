@@ -1,5 +1,8 @@
 import numpy as np
 import itertools
+import matplotlib.pyplot as plt
+import datetime
+
 from cliqeFunctions import F, G, y2row
 
 
@@ -61,7 +64,7 @@ def calculateT(temp, lattice_n):
     return (T_ks + [T_n])
 
 
-def calculateDisterbution(T, temp):
+def calculate_distribution(T, temp):
     """
     calculate the distribution table
     :param T: The algorithm's T to calculate P_{i|i-1)
@@ -80,14 +83,48 @@ def calculateDisterbution(T, temp):
     P1 = [[G(y2row(Y0, n), temp) * F(y2row(Y0, n), y2row(Y1, n), temp) / T[0][Y1]
           for Y0 in range(0, 2**n)]
           for Y1 in range(0, 2**n)]
-    return ([Pn] + Pk + [P1])[::-1]
+    return [Pn] + Pk + [P1]
 
 
-def computer_exercise7(temp, lattice_n=8):
-    T = calculateT(temp, lattice_n)
-    P = calculateDisterbution(T, 1)
-    print(10)
+def sampleIsing(P):
+    """
+    Sample Ising image from P
+    :param P: pmf and condition pmf for each Y sorted from n to 1
+    :return: Ising model represented Y
+    """
+    n = len(P)
+    yn = np.random.choice(np.arange(0, 2**n), p=P[0])
+    yk = itertools.accumulate([yn] + list(range(1, n)),
+                              lambda k_plus1, k: np.random.choice(np.arange(0, 2**n), p=P[k][k_plus1]))
+    return yk
+
+
+def computer_exercise7(lattice_n=8):
+    temps = (1, 1.5, 2)
+    fig, axs = plt.subplots(3, 10)
+
+    cols = ['{}'.format(col) for col in range(1, 11)]
+    rows = ['Temp {}'.format(temp) for temp in temps]
+
+    for i in range(0, 10):
+        axs[2, i].set(xlabel=cols[i])
+    for i in range(0,3):
+        axs[i, 0].set(ylabel=rows[i])
+    for ax in axs.flat:
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    for i in range(0, len(temps)):
+        T = calculateT(temps[i], lattice_n)
+        P = calculate_distribution(T, temps[i])
+        for j in range(0, 10):
+            Y = sampleIsing(P)
+            X = [y2row(yi, lattice_n) for yi in Y]
+            axs[i, j].imshow(X, cmap='gray', vmin=-1, vmax=1)
+    plt.show()
 
 
 def main():
-    computer_exercise7(1, 3)
+    start = datetime.datetime.now()
+    computer_exercise7(8)
+    print(datetime.datetime.now() - start)
