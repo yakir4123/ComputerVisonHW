@@ -1,19 +1,5 @@
 import numpy as np
-from cliqeFunctions import F, G
-
-
-def y2row(y, width=8):
-    """
-    y: an integer in (0,...,(2**width)-1)
-    """
-    if not 0 <= y <= (2**width)-1:
-        raise ValueError(y)
-    my_str = np.binary_repr(y, width)
-    my_list = list(map(int, my_str))
-    my_array = np.asarray(my_list)
-    my_array[my_array == 0] = -1
-    row = my_array
-    return row
+from cliqeFunctions import F, G, y2row
 
 
 def computer_exercise3(temp):
