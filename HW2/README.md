@@ -1,5 +1,5 @@
 # Dynamic Programming in the Ising Model
-[git repo](https://github.com/yakir4123/ComputerVisonHW/HW)
+[git repo](https://github.com/yakir4123/ComputerVisonHW/tree/master/HW2)
 Generating Ising model and do experiments on it: running time, plotting and calculating
 
 ## Output
