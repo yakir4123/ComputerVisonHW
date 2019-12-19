@@ -18,6 +18,6 @@ def y2row(y, width=8):
     my_str = np.binary_repr(y, width)
     my_list = list(map(int, my_str))
     my_array = np.asarray(my_list)
-    my_array = my_array * 2 - 1
+    my_array[my_array == 0] = -1
     row = my_array
     return row

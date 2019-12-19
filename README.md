@@ -1,1 +1,1 @@
-# Dynamic Programming in the Ising Model
+# Computer Vision HWs
