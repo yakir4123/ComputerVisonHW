@@ -4,7 +4,7 @@ import numpy as np
 import itertools
 import matplotlib.pyplot as plt
 
-from HW2.cliqeFunctions import F, G, y2row
+from cliqeFunctions import F, G, y2row
 
 
 class Experiment:

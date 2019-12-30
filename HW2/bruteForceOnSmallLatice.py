@@ -1,5 +1,5 @@
 import numpy as np
-from HW2.cliqeFunctions import F, G, y2row
+from cliqeFunctions import F, G, y2row
 
 
 def computer_exercise3(temp):

@@ -1,5 +1,5 @@
-import HW2.bruteForceOnSmallLatice as bruteForceOnSmallLatice
-import HW2.dynamicProgramming as dynamicProgramming
+import bruteForceOnSmallLatice as bruteForceOnSmallLatice
+import dynamicProgramming as dynamicProgramming
 
 import datetime
 
