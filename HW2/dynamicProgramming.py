@@ -12,8 +12,14 @@ class Experiment:
     def __init__(self, temp, lattice_n):
         self.temp = temp
         self.lattice_n = lattice_n
+        self.y2rows = dict()
         self.P = []
         self.calculate_distribution()
+
+    def y2row(self, y):
+        if y not in self.y2rows:
+            self.y2rows[y] = y2row(y, self.lattice_n)
+        return self.y2rows[y]
 
     def T1(self, y2):
         """
@@ -23,11 +29,10 @@ class Experiment:
         :param lattice_n: represent the nxn lattice: lattice_n x lattice_n
         :return: scalar of T1(y2)
         """
-        lattice_n = self.lattice_n
         temp = self.temp
-        y2_row = y2row(y2, lattice_n)
-        sigma = lambda y1: G(y2row(y1, lattice_n), temp) * F(y2row(y1, lattice_n), y2_row, temp)
-        return sum(map(sigma, range(0, 2 ** lattice_n)))
+        y2_row = self.y2row(y2)
+        sigma = lambda y1: G(self.y2row(y1), temp) * F(self.y2row(y1), y2_row, temp)
+        return sum(map(sigma, range(0, 2 ** self.lattice_n)))
 
     def Tn(self, Tn_minus1):
         """
@@ -37,7 +42,7 @@ class Experiment:
         :param lattice_n: represent the nxn lattice: lattice_n x lattice_n
         :return: scalar of Tn
         """
-        sigma = lambda yn: Tn_minus1[yn] * G(y2row(yn, self.lattice_n), self.temp)
+        sigma = lambda yn: Tn_minus1[yn] * G(self.y2row(yn), self.temp)
         return sum(map(sigma, range(0, 2 ** self.lattice_n)))
 
     def Tk(self, yk_plus1, Tk_minus1):
@@ -48,13 +53,12 @@ class Experiment:
         :param lattice_n: represent the nxn lattice: lattice_n x lattice_n
         :return: scalar of Tk(y_{k+1})
         """
-        lattice_n = self.lattice_n
         temp = self.temp
-        yk1_row = y2row(yk_plus1, lattice_n)
+        yk1_row = self.y2row(yk_plus1)
         sigma = lambda yk: Tk_minus1[yk] * \
-                           G(y2row(yk, lattice_n), temp) * \
-                           F(y2row(yk, lattice_n), yk1_row, temp)
-        return sum(map(sigma, range(0, 2 ** lattice_n)))
+                           G(self.y2row(yk), temp) * \
+                           F(self.y2row(yk), yk1_row, temp)
+        return sum(map(sigma, range(0, 2 ** self.lattice_n)))
 
     def calculateT(self):
         """
@@ -64,7 +68,6 @@ class Experiment:
         :return: List of [Tn .. T1], every Tk is a list with all values that it can get except of Tn that its scalar
         """
         lattice_n = self.lattice_n
-        temp = self.temp
         T_1 = [self.T1(y2) for y2 in range(0, 2 ** lattice_n)]
 
         # list with T1..T_{n-1}
@@ -84,17 +87,17 @@ class Experiment:
         T = self.calculateT()
         n = lattice_n
         # Pn = T_{n-1}(yn) * G(yn) / Tn
-        Pn = np.fromiter((T[n - 2][Yn] * G(y2row(Yn, n), temp) / T[n - 1]
+        Pn = np.fromiter((T[n - 2][Yn] * G(self.y2row(Yn), temp) / T[n - 1]
                          for Yn in range(0, 2 ** n)), dtype='float64')
         # list of all Pk where k in [1.. n-2]  ( or [2 .. n-1] if you look on the algorithm )
         Pk = [np.array([
-            np.fromiter((T[k - 1][Yk] * G(y2row(Yk, n), temp) * F(y2row(Yk, n), y2row(Yk_plus1, n), temp) / T[k][Yk_plus1]
+            np.fromiter((T[k - 1][Yk] * G(self.y2row(Yk), temp) * F(self.y2row(Yk), self.y2row(Yk_plus1), temp) / T[k][Yk_plus1]
                         for Yk in range(0, 2 ** n)), dtype='float64')
             for Yk_plus1 in range(0, 2 ** n)])
               for k in range(n - 2, 0, -1)]
-        P1 = np.array([np.fromiter((G(y2row(Y0, n), temp) * F(y2row(Y0, n), y2row(Y1, n), temp) / T[0][Y1]
-                                     for Y0 in range(0, 2 ** n)), dtype='float64')
-                         for Y1 in range(0, 2 ** n)])
+        P1 = np.array([np.fromiter((G(self.y2row(Y0), temp) * F(self.y2row(Y0), self.y2row(Y1), temp) / T[0][Y1]
+                                    for Y0 in range(0, 2 ** n)), dtype='float64')
+                       for Y1 in range(0, 2 ** n)])
         self.P = [Pn] + Pk + [P1]
         return self.P
 
