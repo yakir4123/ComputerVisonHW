@@ -3,5 +3,5 @@ import HW3.imageRestoration as imageRestoration
 
 
 def main():
-    # estimationNearlyExactValue.main()
+    estimationNearlyExactValue.main()
     imageRestoration.main()
