@@ -132,9 +132,8 @@ def partial_x(filter, sigma):
 
 
 def computer_exercise5(kernel_size, sigma, theta_start, theta_end, count):
-    # ascent = cv2.cvtColor(cv2.imread('HW4\\hw4_data\\ascent.jpg'), cv2.COLOR_BGR2GRAY)
     ascent = scipy.misc.ascent()
-    fig, axs = plt.subplots(2, count)
+    fig, axs = plt.subplots(2, count, figsize=(20, 8))
     fig.suptitle('kernel size = {} sigma = {}'.format(kernel_size, sigma), fontsize=16)
 
     kernel = cv2.getGaussianKernel(kernel_size, sigma)
@@ -158,7 +157,7 @@ def computer_exercise5(kernel_size, sigma, theta_start, theta_end, count):
         axs[1, i].set_yticks([])
 
         theta += theta_delta
-    plt.subplots_adjust( wspace=0.1, hspace=-1)
+    # plt.subplots_adjust(wspace=0.1, hspace=-1)
     # plt.subplots_adjust(top=0.85, bottom=0.75, left=0.2, right=0.85, wspace=-0.1, hspace=1)
     plt.show()
 

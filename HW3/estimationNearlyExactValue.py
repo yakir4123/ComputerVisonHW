@@ -54,7 +54,7 @@ def method2(sweeps, ignore_sweeps, size, temp):
 
 
 def worker(times, size, sweeps, temp, sweeps_ignore):
-    method1(times, size, sweeps, temp)
+    method1(times, size, sweeps * 2, temp)
     method2(times * sweeps, sweeps_ignore, size, temp)
 
 
