@@ -93,29 +93,32 @@ class Experiment:
         Pk = [np.array([
             np.fromiter((T[k - 1][Yk] * G(self.y2row(Yk), temp) * F(self.y2row(Yk), self.y2row(Yk_plus1), temp) / T[k][Yk_plus1]
                         for Yk in range(0, 2 ** n)), dtype='float64')
-            for Yk_plus1 in range(0, 2 ** n)])
-              for k in range(n - 2, 0, -1)]
+                            for Yk_plus1 in range(0, 2 ** n)])
+                                for k in range(n - 2, 0, -1)]
         P1 = np.array([np.fromiter((G(self.y2row(Y0), temp) * F(self.y2row(Y0), self.y2row(Y1), temp) / T[0][Y1]
-                                    for Y0 in range(0, 2 ** n)), dtype='float64')
-                       for Y1 in range(0, 2 ** n)])
+                        for Y0 in range(0, 2 ** n)), dtype='float64')
+                            for Y1 in range(0, 2 ** n)])
+        # self.P = [Pn] + Pk + [P1]
+        Pk.reverse()
         self.P = [Pn] + Pk + [P1]
         return self.P
 
-    def sampleIsing(self, P):
+
+    def sampleIsing(self):
         """
         Sample Ising image from P
         :param P: pmf and condition pmf for each Y sorted from n to 1
         :return: Ising model represented Y
         """
-        n = len(P)
-        yn = np.random.choice(np.arange(0, 2 ** n), p=P[0])
+        n = len(self.P)
+        yn = np.random.choice(np.arange(0, 2 ** n), p=self.P[0])
         yk = itertools.accumulate([yn] + list(range(1, n)),
-                                  lambda k_plus1, k: np.random.choice(np.arange(0, 2 ** n), p=P[k][k_plus1]))
+                                  lambda k_plus1, k: np.random.choice(np.arange(0, 2 ** n), p=self.P[k][k_plus1]))
         return yk
 
     def generateImages(self, samples):
         for _ in range(0, samples):
-            yield self.sampleIsing(self.P)
+            yield self.sampleIsing()
 
 
 def worker(experiment, samples):
@@ -143,19 +146,21 @@ def computer_exercise7(experiments):
     pool = multiprocessing.Pool(processes=len(experiments))
     # call with different process to worker(temp,samples,lattice_n)
     images = pool.starmap(worker, map(lambda exp: (exp, samples), experiments))
-    [axs[i, j].imshow(images[i][j], cmap='gray', vmin=-1, vmax=1) for j in range(0, samples) for i in range(0, len(images))]
+    [axs[i, j].imshow(images[i][j], cmap='gray', vmin=-1, vmax=1, interpolation="None")
+        for j in range(0, samples) for i in range(0, len(images))]
     pool.close()
     plt.show()
 
 
 def computer_exercise8(experiments):
     samples = 10000
-    slices = 4
+    slices = 1
     pool = multiprocessing.Pool(processes=len(experiments)*slices)
     work_on = list(itertools.chain(*[[(exp, samples//slices) for _ in range(0, slices) for exp in experiments]]))
     work_on.sort(key=lambda tup: tup[0].temp)
     workers_images = pool.starmap(worker, work_on)
     pool.close()
+    # workers_images = [worker(experiment, samples) for experiment in experiments]
     for i in range(0, len(experiments)):
         res = sum(image[0][0] * np.array((image[1][1], image[-1][-1]))
                   for slice in workers_images[i:i+slices] for image in slice)/samples
@@ -174,7 +179,7 @@ def main():
 
     pool = multiprocessing.Pool(processes=len(temps))
     experiments = pool.starmap(create_experiment, map(lambda temp: (temp, lattice_n), temps))
-    computer_exercise7(experiments)
+    # computer_exercise7(experiments)
     print("\n\t--- Computer Exercise 8 ---")
     computer_exercise8(experiments)
     print("\t--- Computer Exercise 8 ---")

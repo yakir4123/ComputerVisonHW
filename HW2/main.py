@@ -3,7 +3,7 @@ import HW2.dynamicProgramming as dynamicProgramming
 
 
 def main():
-    bruteForceOnSmallLatice.main()
+    # bruteForceOnSmallLatice.main()
     dynamicProgramming.main()
 
 
