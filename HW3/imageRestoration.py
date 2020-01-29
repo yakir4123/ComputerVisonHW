@@ -59,11 +59,11 @@ def main():
         posterior_sample = gibbs_sampling(temp, size, 50, ising_posterior_pmf, None, noised_sample, sigma * sigma)
         axs[temps.index(temp), 2].imshow(posterior_sample, cmap='gray')
 
-        # step 4
+        # step 4 ICM
         argmax_posterior_sample = gibbs_sampling(temp, size, 50, argmax_ising_posterior, None, noised_sample, sigma * sigma)
         axs[temps.index(temp), 3].imshow(argmax_posterior_sample, cmap='gray')
 
-        # step 5
+        # step 5 maximum estimator
         argmax_likelihood = np.sign(noised_sample)
         axs[temps.index(temp), 4].imshow(argmax_likelihood, cmap='gray')
 
